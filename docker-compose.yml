@@ -1,0 +1,120 @@
+# Docker Compose configuration for Laravel SaaS development
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: laravel-saas-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+      - ./docker/app/php.ini:/usr/local/etc/php/conf.d/local.ini
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+    networks:
+      - laravel-saas
+    depends_on:
+      - mysql
+      - redis
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    container_name: laravel-saas-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+    networks:
+      - laravel-saas
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    container_name: laravel-saas-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: laravel_saas
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - laravel-saas
+
+  mysql_test:
+    image: mysql:8.0
+    container_name: laravel-saas-mysql-test
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: laravel_saas_test
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_test_data:/var/lib/mysql
+    networks:
+      - laravel-saas
+
+  redis:
+    image: redis:7-alpine
+    container_name: laravel-saas-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - laravel-saas
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: laravel-saas-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - laravel-saas
+
+  node:
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    container_name: laravel-saas-node
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+      - node_modules:/var/www/html/node_modules
+    ports:
+      - "3000:3000"
+      - "5173:5173"
+    networks:
+      - laravel-saas
+    tty: true
+
+volumes:
+  mysql_data:
+  mysql_test_data:
+  redis_data:
+  node_modules:
+
+networks:
+  laravel-saas:
+    driver: bridge

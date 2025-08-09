@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Laravel SaaS Modular">
+    <description>Laravel SaaS Modular coding standards</description>
+
+    <!-- Files to check -->
+    <file>app</file>
+    <file>modules</file>
+    <file>tests</file>
+
+    <!-- Files to ignore -->
+    <exclude-pattern>bootstrap/</exclude-pattern>
+    <exclude-pattern>storage/</exclude-pattern>
+    <exclude-pattern>vendor/</exclude-pattern>
+    <exclude-pattern>node_modules/</exclude-pattern>
+
+    <!-- Use PSR-12 as base -->
+    <rule ref="PSR12"/>
+
+    <!-- Additional Laravel specific rules -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="0"/>
+        </properties>
+    </rule>
+
+    <!-- Allow long lines in certain contexts -->
+    <rule ref="Generic.Files.LineLength">
+        <exclude-pattern>*/database/migrations/*</exclude-pattern>
+    </rule>
+
+    <!-- Ignore mixed case file names for Laravel -->
+    <rule ref="Generic.Files.LowercasedFilename">
+        <exclude-pattern>app/</exclude-pattern>
+        <exclude-pattern>modules/</exclude-pattern>
+    </rule>
+</ruleset>

@@ -1,0 +1,31 @@
+{
+    "name": "laravel-saas-modular",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite --host 0.0.0.0",
+        "hot": "vite --host 0.0.0.0 --port 5173",
+        "preview": "vite preview --host 0.0.0.0"
+    },
+    "devDependencies": {
+        "@popperjs/core": "^2.11.6",
+        "@vitejs/plugin-vue": "^5.0.0",
+        "autoprefixer": "^10.4.16",
+        "axios": "^1.6.4",
+        "bootstrap": "^5.3.0",
+        "laravel-vite-plugin": "^1.0",
+        "postcss": "^8.4.32",
+        "sass": "^1.69.0",
+        "tailwindcss": "^3.4.0",
+        "vite": "^5.0",
+        "vue": "^3.4.0"
+    },
+    "dependencies": {
+        "@headlessui/vue": "^1.7.16",
+        "@heroicons/vue": "^2.0.18",
+        "@inertiajs/vue3": "^1.0.0",
+        "alpinejs": "^3.13.0",
+        "vue-router": "^4.2.5"
+    }
+}

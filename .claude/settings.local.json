@@ -2,7 +2,32 @@
   "permissions": {
     "allow": [
       "Bash(gh label create:*)",
-      "Bash(gh issue create:*)"
+      "Bash(gh issue create:*)",
+      "Bash(mkdir:*)",
+      "Bash(chmod:*)",
+      "Bash(make:*)",
+      "Bash(sudo mkdir:*)",
+      "Bash(docker:*)",
+      "Bash(composer --version)",
+      "Bash(composer install:*)",
+      "Bash(gh issue edit:*)",
+      "Bash(cp:*)",
+      "Bash(php artisan:*)",
+      "Bash(composer create-project:*)",
+      "Bash(rm:*)",
+      "Bash(git push:*)",
+      "Bash(cat:*)",
+      "Bash(php:*)",
+      "Bash(composer update:*)",
+      "Bash(composer:*)",
+      "Bash(pkill:*)",
+      "Bash(find:*)",
+      "Bash(touch:*)",
+      "Bash(curl:*)",
+      "Bash(gh issue close:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue comment:*)"
     ],
     "deny": []
   }

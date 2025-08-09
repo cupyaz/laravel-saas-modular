@@ -1,0 +1,18 @@
+{
+    "preset": "laravel",
+    "rules": {
+        "simplified_null_return": true,
+        "braces": {
+            "allow_single_line_closure": true
+        },
+        "new_with_braces": true,
+        "method_argument_space": {
+            "on_multiline": "ignore"
+        }
+    },
+    "exclude": [
+        "bootstrap",
+        "storage",
+        "vendor"
+    ]
+}
