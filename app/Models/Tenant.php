@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Laravel\Cashier\Billable;
 
 class Tenant extends Model
 {
-    use HasFactory;
+    use HasFactory, Billable;
 
     /**
      * The attributes that are mass assignable.
@@ -25,6 +26,9 @@ class Tenant extends Model
         'config',
         'is_active',
         'trial_ends_at',
+        'stripe_id',
+        'pm_type',
+        'pm_last_four',
     ];
 
     /**
