@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ExampleFeatureController;
+use App\Http\Controllers\Api\FeatureController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\SubscriptionController;
@@ -58,6 +60,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/compare', [PlanController::class, 'compare'])
             ->name('api.plans.compare');
     });
+
+    // Public feature information (no auth required)
+    Route::get('/features', [FeatureController::class, 'allFeatures'])
+        ->name('api.features.public');
 
     // Protected API routes
     Route::middleware('auth:sanctum')->group(function () {
@@ -129,6 +135,60 @@ Route::prefix('v1')->group(function () {
         // Plan recommendations (authenticated)
         Route::get('/plans/recommendations', [PlanController::class, 'recommendations'])
             ->name('api.plans.recommendations');
+
+        // Feature access management
+        Route::prefix('features')->group(function () {
+            Route::get('/', [FeatureController::class, 'index'])
+                ->name('api.features.index');
+                
+            Route::get('/{feature}/check', [FeatureController::class, 'checkAccess'])
+                ->name('api.features.check');
+                
+            Route::post('/{feature}/usage', [FeatureController::class, 'checkUsage'])
+                ->name('api.features.usage');
+                
+            Route::post('/usage/increment', [FeatureController::class, 'incrementUsage'])
+                ->name('api.features.increment');
+                
+            Route::get('/usage/summary', [FeatureController::class, 'usageSummary'])
+                ->name('api.features.usage-summary');
+                
+            Route::get('/recommendations', [FeatureController::class, 'upgradeRecommendations'])
+                ->name('api.features.recommendations');
+        });
+
+        // Example feature-gated endpoints (demonstrating freemium functionality)
+        Route::prefix('examples')->group(function () {
+            // Freemium features with usage limits
+            Route::post('/reports/basic', [ExampleFeatureController::class, 'generateBasicReport'])
+                ->middleware('feature:basic_reports,reports_per_month')
+                ->name('api.examples.basic-report');
+                
+            Route::post('/files/upload', [ExampleFeatureController::class, 'uploadFile'])
+                ->middleware('feature:file_storage,storage_mb')
+                ->name('api.examples.upload-file');
+                
+            Route::post('/projects', [ExampleFeatureController::class, 'createProject'])
+                ->middleware('feature:projects,max_projects')
+                ->name('api.examples.create-project');
+                
+            Route::post('/api-call', [ExampleFeatureController::class, 'makeApiCall'])
+                ->middleware('feature:api_access,api_calls_per_month')
+                ->name('api.examples.api-call');
+                
+            // Premium-only features
+            Route::get('/analytics/advanced', [ExampleFeatureController::class, 'getAdvancedAnalytics'])
+                ->middleware('feature:advanced_analytics')
+                ->name('api.examples.advanced-analytics');
+                
+            Route::get('/branding', [ExampleFeatureController::class, 'getCustomBranding'])
+                ->middleware('feature:custom_branding')
+                ->name('api.examples.custom-branding');
+                
+            Route::post('/export', [ExampleFeatureController::class, 'exportData'])
+                ->middleware('feature:export_data')
+                ->name('api.examples.export-data');
+        });
         
         // User management
         Route::prefix('users')->group(function () {

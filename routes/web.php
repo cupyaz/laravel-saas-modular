@@ -83,6 +83,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/subscriptions/manage', function () {
         return view('subscriptions.manage');
     })->name('subscriptions.manage');
+    
+    Route::get('/features', function () {
+        return view('features.dashboard');
+    })->name('features.dashboard');
 });
 
 // Stripe webhook routes (no auth required)
