@@ -29,7 +29,8 @@
       "Bash(gh issue view:*)",
       "Bash(gh issue comment:*)",
       "Bash(grep:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(sqlite3:*)"
     ],
     "deny": []
   }

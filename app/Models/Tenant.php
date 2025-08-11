@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -19,6 +20,7 @@ class Tenant extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'user_id',
         'name',
         'slug',
         'domain',
@@ -29,6 +31,8 @@ class Tenant extends Model
         'stripe_id',
         'pm_type',
         'pm_last_four',
+        'billing_address',
+        'tax_id',
     ];
 
     /**
@@ -40,9 +44,18 @@ class Tenant extends Model
     {
         return [
             'config' => 'array',
+            'billing_address' => 'array',
             'is_active' => 'boolean',
             'trial_ends_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get the tenant's primary user (owner).
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**

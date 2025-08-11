@@ -7,14 +7,16 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Billable;
 
     /**
      * The attributes that are mass assignable.
@@ -199,6 +201,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function completeOnboarding(): void
     {
         $this->update(['onboarding_completed' => true]);
+    }
+
+    /**
+     * Get the user's primary tenant.
+     */
+    public function tenant(): HasOne
+    {
+        return $this->hasOne(Tenant::class);
     }
 
     /**

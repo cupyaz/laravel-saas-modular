@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\TaxCalculationController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -60,6 +62,28 @@ Route::prefix('v1')->group(function () {
             Route::post('/refresh', [AuthController::class, 'refresh'])
                 ->name('api.auth.refresh');
         });
+
+        // Payment processing
+        Route::prefix('payment')->group(function () {
+            Route::post('/setup-intent', [PaymentController::class, 'createSetupIntent'])
+                ->name('api.payment.setup-intent');
+                
+            Route::post('/process', [PaymentController::class, 'processPayment'])
+                ->name('api.payment.process');
+                
+            Route::post('/bank-transfer', [PaymentController::class, 'setupBankTransfer'])
+                ->name('api.payment.bank-transfer');
+                
+            Route::get('/methods', [PaymentController::class, 'getPaymentMethods'])
+                ->name('api.payment.methods');
+                
+            Route::delete('/methods/{paymentMethodId}', [PaymentController::class, 'deletePaymentMethod'])
+                ->name('api.payment.methods.delete');
+        });
+        
+        // Tax calculation
+        Route::post('/calculate-tax', [TaxCalculationController::class, 'calculateTax'])
+            ->name('api.calculate-tax');
         
         // User management
         Route::prefix('users')->group(function () {
@@ -113,10 +137,18 @@ Route::prefix('v1')->group(function () {
                         'GET /api/v1/profile',
                         'PUT /api/v1/profile',
                     ],
+                    'payment' => [
+                        'POST /api/v1/payment/setup-intent',
+                        'POST /api/v1/payment/process',
+                        'POST /api/v1/payment/bank-transfer',
+                        'GET /api/v1/payment/methods',
+                        'DELETE /api/v1/payment/methods/{id}',
+                    ],
                     'system' => [
                         'GET /api/v1/health',
                         'GET /api/v1/status',
                         'GET /api/v1/info',
+                        'POST /api/v1/calculate-tax',
                     ],
                 ],
                 'rate_limits' => [

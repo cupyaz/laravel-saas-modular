@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -60,6 +62,28 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         return view('dashboard');
     })->name('dashboard');
 });
+
+// Payment routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/payment/checkout/{planId}', [PaymentController::class, 'checkout'])
+        ->name('payment.checkout');
+        
+    Route::get('/payment/success', [PaymentController::class, 'success'])
+        ->name('payment.success');
+        
+    Route::get('/payment/cancel', [PaymentController::class, 'cancel'])
+        ->name('payment.cancel');
+        
+    Route::get('/payment/bank-transfer-instructions', [PaymentController::class, 'bankTransferInstructions'])
+        ->name('payment.bank-transfer-instructions');
+        
+    Route::get('/billing', [PaymentController::class, 'billing'])
+        ->name('billing.dashboard');
+});
+
+// Stripe webhook routes (no auth required)
+Route::post('/stripe/webhook', [WebhookController::class, 'handleWebhook'])
+    ->name('cashier.webhook');
 
 // Health check route
 Route::get('/health', function () {

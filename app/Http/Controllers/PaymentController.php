@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Plan;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -12,16 +13,7 @@ class PaymentController extends Controller
      */
     public function checkout($planId): View
     {
-        // Mock plan data per il test
-        $plan = (object) [
-            'id' => $planId,
-            'name' => 'Premium Plan',
-            'description' => 'Full access to all features',
-            'price' => 29.99,
-            'billing_period' => 'monthly',
-            'trial_days' => 14,
-            'features' => ['unlimited_users', 'priority_support', 'advanced_analytics']
-        ];
+        $plan = Plan::findOrFail($planId);
 
         return view('payment.checkout', [
             'plan' => $plan,
@@ -65,12 +57,31 @@ class PaymentController extends Controller
      */
     public function billing(): View
     {
+        $user = auth()->user();
+        $tenant = $user->tenant;
+        $subscriptions = collect([]);
+        $invoices = collect([]);
+        $paymentMethods = collect([]);
+
+        if ($tenant) {
+            $subscriptions = $tenant->subscriptions()->with('plan')->get();
+        }
+
+        if ($user->hasStripeId()) {
+            try {
+                $paymentMethods = $user->paymentMethods();
+            } catch (\Exception $e) {
+                // Handle Stripe errors gracefully
+                $paymentMethods = collect([]);
+            }
+        }
+
         return view('billing.dashboard', [
-            'user' => auth()->user(),
-            'tenant' => null,
-            'subscriptions' => collect([]),
-            'invoices' => collect([]),
-            'paymentMethods' => collect([]),
+            'user' => $user,
+            'tenant' => $tenant,
+            'subscriptions' => $subscriptions,
+            'invoices' => $invoices,
+            'paymentMethods' => $paymentMethods,
         ]);
     }
 }
