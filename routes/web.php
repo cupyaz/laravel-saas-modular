@@ -79,6 +79,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
     Route::get('/billing', [PaymentController::class, 'billing'])
         ->name('billing.dashboard');
+        
+    Route::get('/subscriptions/manage', function () {
+        return view('subscriptions.manage');
+    })->name('subscriptions.manage');
 });
 
 // Stripe webhook routes (no auth required)

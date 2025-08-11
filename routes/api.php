@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\PlanController;
+use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TaxCalculationController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -45,6 +47,18 @@ Route::prefix('v1')->group(function () {
             ->name('api.auth.login');
     });
 
+    // Public plan information (no auth required)
+    Route::prefix('plans')->group(function () {
+        Route::get('/', [PlanController::class, 'index'])
+            ->name('api.plans.index');
+            
+        Route::get('/{plan}', [PlanController::class, 'show'])
+            ->name('api.plans.show');
+            
+        Route::post('/compare', [PlanController::class, 'compare'])
+            ->name('api.plans.compare');
+    });
+
     // Protected API routes
     Route::middleware('auth:sanctum')->group(function () {
         
@@ -84,6 +98,37 @@ Route::prefix('v1')->group(function () {
         // Tax calculation
         Route::post('/calculate-tax', [TaxCalculationController::class, 'calculateTax'])
             ->name('api.calculate-tax');
+            
+        // Subscription management
+        Route::prefix('subscriptions')->group(function () {
+            Route::get('/', [SubscriptionController::class, 'index'])
+                ->name('api.subscriptions.index');
+                
+            Route::get('/{subscription}', [SubscriptionController::class, 'show'])
+                ->name('api.subscriptions.show');
+                
+            Route::post('/{subscription}/change-plan', [SubscriptionController::class, 'changePlan'])
+                ->name('api.subscriptions.change-plan');
+                
+            Route::post('/{subscription}/pause', [SubscriptionController::class, 'pause'])
+                ->name('api.subscriptions.pause');
+                
+            Route::post('/{subscription}/resume', [SubscriptionController::class, 'resume'])
+                ->name('api.subscriptions.resume');
+                
+            Route::post('/{subscription}/cancel', [SubscriptionController::class, 'cancel'])
+                ->name('api.subscriptions.cancel');
+                
+            Route::post('/{subscription}/reactivate', [SubscriptionController::class, 'reactivate'])
+                ->name('api.subscriptions.reactivate');
+                
+            Route::post('/{subscription}/offers/{offer}/accept', [SubscriptionController::class, 'acceptRetentionOffer'])
+                ->name('api.subscriptions.offers.accept');
+        });
+
+        // Plan recommendations (authenticated)
+        Route::get('/plans/recommendations', [PlanController::class, 'recommendations'])
+            ->name('api.plans.recommendations');
         
         // User management
         Route::prefix('users')->group(function () {
@@ -143,6 +188,22 @@ Route::prefix('v1')->group(function () {
                         'POST /api/v1/payment/bank-transfer',
                         'GET /api/v1/payment/methods',
                         'DELETE /api/v1/payment/methods/{id}',
+                    ],
+                    'subscriptions' => [
+                        'GET /api/v1/subscriptions',
+                        'GET /api/v1/subscriptions/{id}',
+                        'POST /api/v1/subscriptions/{id}/change-plan',
+                        'POST /api/v1/subscriptions/{id}/pause',
+                        'POST /api/v1/subscriptions/{id}/resume',
+                        'POST /api/v1/subscriptions/{id}/cancel',
+                        'POST /api/v1/subscriptions/{id}/reactivate',
+                        'POST /api/v1/subscriptions/{id}/offers/{id}/accept',
+                    ],
+                    'plans' => [
+                        'GET /api/v1/plans',
+                        'GET /api/v1/plans/{id}',
+                        'POST /api/v1/plans/compare',
+                        'GET /api/v1/plans/recommendations',
                     ],
                     'system' => [
                         'GET /api/v1/health',
