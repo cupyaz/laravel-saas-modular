@@ -30,7 +30,8 @@
       "Bash(gh issue comment:*)",
       "Bash(grep:*)",
       "Bash(git add:*)",
-      "Bash(sqlite3:*)"
+      "Bash(sqlite3:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TaxCalculationController;
+use App\Http\Controllers\Api\UsageController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -155,6 +156,30 @@ Route::prefix('v1')->group(function () {
                 
             Route::get('/recommendations', [FeatureController::class, 'upgradeRecommendations'])
                 ->name('api.features.recommendations');
+        });
+
+        // Usage tracking and analytics
+        Route::prefix('usage')->group(function () {
+            Route::get('/summary', [UsageController::class, 'summary'])
+                ->name('api.usage.summary');
+                
+            Route::get('/meters', [UsageController::class, 'meters'])
+                ->name('api.usage.meters');
+                
+            Route::get('/analytics', [UsageController::class, 'analytics'])
+                ->name('api.usage.analytics');
+                
+            Route::get('/alerts', [UsageController::class, 'alerts'])
+                ->name('api.usage.alerts');
+                
+            Route::post('/alerts/acknowledge', [UsageController::class, 'acknowledgeAlerts'])
+                ->name('api.usage.alerts.acknowledge');
+                
+            Route::post('/track', [UsageController::class, 'track'])
+                ->name('api.usage.track');
+                
+            Route::post('/can-perform', [UsageController::class, 'canPerform'])
+                ->name('api.usage.can-perform');
         });
 
         // Example feature-gated endpoints (demonstrating freemium functionality)
