@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TaxCalculationController;
+use App\Http\Controllers\Api\UpgradePromptController;
 use App\Http\Controllers\Api\UsageController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -180,6 +181,42 @@ Route::prefix('v1')->group(function () {
                 
             Route::post('/can-perform', [UsageController::class, 'canPerform'])
                 ->name('api.usage.can-perform');
+        });
+
+        // Upgrade prompts and conversion optimization
+        Route::prefix('upgrade-prompts')->group(function () {
+            Route::get('/', [UpgradePromptController::class, 'getPrompts'])
+                ->name('api.upgrade-prompts.get');
+                
+            Route::post('/action', [UpgradePromptController::class, 'recordAction'])
+                ->name('api.upgrade-prompts.action');
+                
+            Route::get('/recommendations', [UpgradePromptController::class, 'getRecommendations'])
+                ->name('api.upgrade-prompts.recommendations');
+                
+            Route::post('/conversion', [UpgradePromptController::class, 'trackConversion'])
+                ->name('api.upgrade-prompts.conversion');
+                
+            Route::post('/dismiss-all', [UpgradePromptController::class, 'dismissAll'])
+                ->name('api.upgrade-prompts.dismiss-all');
+                
+            Route::get('/assignments', [UpgradePromptController::class, 'getMyAssignments'])
+                ->name('api.upgrade-prompts.assignments');
+        });
+
+        // Admin-only upgrade prompt analytics and A/B testing
+        Route::prefix('admin/upgrade-prompts')->group(function () {
+            Route::get('/analytics', [UpgradePromptController::class, 'getAnalytics'])
+                ->name('api.admin.upgrade-prompts.analytics');
+                
+            Route::get('/ab-tests', [UpgradePromptController::class, 'getABTestResults'])
+                ->name('api.admin.upgrade-prompts.ab-tests');
+                
+            Route::post('/ab-tests', [UpgradePromptController::class, 'createABTest'])
+                ->name('api.admin.upgrade-prompts.ab-tests.create');
+                
+            Route::post('/ab-tests/end', [UpgradePromptController::class, 'endABTest'])
+                ->name('api.admin.upgrade-prompts.ab-tests.end');
         });
 
         // Example feature-gated endpoints (demonstrating freemium functionality)
