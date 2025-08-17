@@ -17,9 +17,14 @@ return Application::configure(basePath: dirname(__DIR__))
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
+        $middleware->web(prepend: [
+            \App\Http\Middleware\MobileOptimization::class,
+        ]);
+
         $middleware->alias([
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'feature' => \App\Http\Middleware\CheckFeatureAccess::class,
+            'mobile' => \App\Http\Middleware\MobileOptimization::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

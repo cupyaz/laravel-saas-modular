@@ -93,6 +93,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::post('/stripe/webhook', [WebhookController::class, 'handleWebhook'])
     ->name('cashier.webhook');
 
+// PWA routes
+Route::get('/manifest.json', function () {
+    return response()->file(public_path('manifest.json'))
+        ->header('Content-Type', 'application/json');
+});
+
+Route::get('/sw.js', function () {
+    return response()->file(public_path('sw.js'))
+        ->header('Content-Type', 'application/javascript');
+});
+
+Route::get('/offline.html', function () {
+    return response()->file(public_path('offline.html'))
+        ->header('Content-Type', 'text/html');
+});
+
 // Health check route
 Route::get('/health', function () {
     return response()->json([

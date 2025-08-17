@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExampleFeatureController;
 use App\Http\Controllers\Api\FeatureController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\PerformanceController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TaxCalculationController;
@@ -278,6 +279,24 @@ Route::prefix('v1')->group(function () {
             Route::put('/', function (Request $request) {
                 return app(UserController::class)->update($request, $request->user());
             })->name('api.profile.update');
+        });
+        
+        // Performance monitoring and optimization
+        Route::prefix('performance')->group(function () {
+            Route::post('/track', [PerformanceController::class, 'track'])
+                ->name('api.performance.track');
+                
+            Route::get('/analytics', [PerformanceController::class, 'analytics'])
+                ->name('api.performance.analytics');
+                
+            Route::get('/recommendations', [PerformanceController::class, 'recommendations'])
+                ->name('api.performance.recommendations');
+                
+            Route::get('/config', [PerformanceController::class, 'config'])
+                ->name('api.performance.config');
+                
+            Route::get('/monitor', [PerformanceController::class, 'monitor'])
+                ->name('api.performance.monitor');
         });
         
         // API Information and documentation

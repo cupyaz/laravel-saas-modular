@@ -157,6 +157,7 @@ return [
     'providers' => [
         // Laravel Framework Service Providers...
         App\Providers\AppServiceProvider::class,
+        // Temporarily disabled - App\Providers\MobileBladeServiceProvider::class,
         // Temporarily disabled - App\Providers\ModuleServiceProvider::class,
     ],
 
