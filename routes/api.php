@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExampleFeatureController;
 use App\Http\Controllers\Api\FeatureController;
 use App\Http\Controllers\Api\FreeTierController;
+use App\Http\Controllers\Api\ModuleController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PerformanceController;
 use App\Http\Controllers\Api\PlanController;
@@ -96,6 +97,14 @@ Route::prefix('v1')->middleware(['api.version', 'api.rate'])->group(function () 
     // Public feature information (no auth required)
     Route::get('/features', [FeatureController::class, 'allFeatures'])
         ->name('api.features.public');
+
+    // Module Marketplace (Public)
+    Route::prefix('modules')->group(function () {
+        Route::get('/', [ModuleController::class, 'index'])->name('api.modules.index');
+        Route::get('/categories', [ModuleController::class, 'categories'])->name('api.modules.categories');
+        Route::get('/{slug}', [ModuleController::class, 'show'])->name('api.modules.show');
+        Route::get('/{slug}/reviews', [ModuleController::class, 'reviews'])->name('api.modules.reviews');
+    });
 
     // Protected API routes
     Route::middleware('auth:sanctum')->group(function () {
@@ -371,6 +380,14 @@ Route::prefix('v1')->middleware(['api.version', 'api.rate'])->group(function () 
                 
             Route::post('/rotate-encryption-key', [TenantController::class, 'rotateEncryptionKey'])
                 ->name('api.tenant.rotate-encryption-key');
+        });
+
+        // Authenticated Module Operations
+        Route::prefix('modules')->group(function () {
+            Route::get('/installed', [ModuleController::class, 'installed'])->name('api.modules.installed');
+            Route::post('/{slug}/install', [ModuleController::class, 'install'])->name('api.modules.install');
+            Route::put('/{slug}/config', [ModuleController::class, 'updateConfig'])->name('api.modules.config');
+            Route::delete('/{slug}', [ModuleController::class, 'uninstall'])->name('api.modules.uninstall');
         });
         
         // API Information and documentation

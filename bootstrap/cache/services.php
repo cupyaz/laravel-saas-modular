@@ -2,26 +2,22 @@
   'providers' => 
   array (
     0 => 'Barryvdh\\DomPDF\\ServiceProvider',
-    1 => 'Laravel\\Cashier\\CashierServiceProvider',
-    2 => 'Laravel\\Sail\\SailServiceProvider',
-    3 => 'Laravel\\Sanctum\\SanctumServiceProvider',
-    4 => 'Laravel\\Tinker\\TinkerServiceProvider',
-    5 => 'Carbon\\Laravel\\ServiceProvider',
-    6 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
-    7 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    8 => 'Stancl\\Tenancy\\TenancyServiceProvider',
-    9 => 'App\\Providers\\AppServiceProvider',
+    1 => 'Laravel\\Sail\\SailServiceProvider',
+    2 => 'Laravel\\Sanctum\\SanctumServiceProvider',
+    3 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    4 => 'Carbon\\Laravel\\ServiceProvider',
+    5 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    6 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    7 => 'App\\Providers\\AppServiceProvider',
   ),
   'eager' => 
   array (
     0 => 'Barryvdh\\DomPDF\\ServiceProvider',
-    1 => 'Laravel\\Cashier\\CashierServiceProvider',
-    2 => 'Laravel\\Sanctum\\SanctumServiceProvider',
-    3 => 'Carbon\\Laravel\\ServiceProvider',
-    4 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
-    5 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    6 => 'Stancl\\Tenancy\\TenancyServiceProvider',
-    7 => 'App\\Providers\\AppServiceProvider',
+    1 => 'Laravel\\Sanctum\\SanctumServiceProvider',
+    2 => 'Carbon\\Laravel\\ServiceProvider',
+    3 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    4 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    5 => 'App\\Providers\\AppServiceProvider',
   ),
   'deferred' => 
   array (

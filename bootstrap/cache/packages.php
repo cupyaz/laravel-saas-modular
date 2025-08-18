@@ -11,13 +11,6 @@
       0 => 'Barryvdh\\DomPDF\\ServiceProvider',
     ),
   ),
-  'laravel/cashier' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Laravel\\Cashier\\CashierServiceProvider',
-    ),
-  ),
   'laravel/sail' => 
   array (
     'providers' => 
@@ -58,18 +51,6 @@
     'providers' => 
     array (
       0 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    ),
-  ),
-  'stancl/tenancy' => 
-  array (
-    'aliases' => 
-    array (
-      'Tenancy' => 'Stancl\\Tenancy\\Facades\\Tenancy',
-      'GlobalCache' => 'Stancl\\Tenancy\\Facades\\GlobalCache',
-    ),
-    'providers' => 
-    array (
-      0 => 'Stancl\\Tenancy\\TenancyServiceProvider',
     ),
   ),
 );

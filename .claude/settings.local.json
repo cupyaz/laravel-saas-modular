@@ -35,7 +35,8 @@
       "Bash(./vendor/bin/phpunit:*)",
       "WebSearch",
       "Bash(sed:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(git init:*)"
     ],
     "deny": []
   }

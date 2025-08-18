@@ -15,22 +15,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Register missing core bindings
-        $this->app->singleton('files', function () {
-            return new \Illuminate\Filesystem\Filesystem;
-        });
-
-        $this->app->singleton('events', function ($app) {
-            return new \Illuminate\Events\Dispatcher($app);
-        });
-
-        $this->app->singleton('cache', function ($app) {
-            return new \Illuminate\Cache\CacheManager($app);
-        });
-
-        $this->app->singleton('cache.store', function ($app) {
-            return $app['cache']->driver();
-        });
+        //
     }
 
     /**
