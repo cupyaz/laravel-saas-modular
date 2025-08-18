@@ -30,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'feature' => \App\Http\Middleware\CheckFeatureAccess::class,
+            'feature.gate' => \App\Http\Middleware\FeatureGate::class,
             'mobile' => \App\Http\Middleware\MobileOptimization::class,
             'tenant' => \App\Http\Middleware\TenantIsolation::class,
         ]);

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExampleFeatureController;
 use App\Http\Controllers\Api\FeatureController;
+use App\Http\Controllers\Api\FreeTierController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PerformanceController;
 use App\Http\Controllers\Api\PlanController;
@@ -161,6 +162,27 @@ Route::prefix('v1')->group(function () {
                 ->name('api.features.recommendations');
         });
 
+        // Free tier management and feature access
+        Route::prefix('free-tier')->group(function () {
+            Route::get('/plan', [FreeTierController::class, 'getCurrentPlan'])
+                ->name('api.free-tier.plan');
+                
+            Route::get('/features', [FreeTierController::class, 'getFeatures'])
+                ->name('api.free-tier.features');
+                
+            Route::get('/features/{featureSlug}/check', [FreeTierController::class, 'checkFeatureAccess'])
+                ->name('api.free-tier.features.check');
+                
+            Route::get('/usage', [FreeTierController::class, 'getUsageStats'])
+                ->name('api.free-tier.usage');
+                
+            Route::get('/comparison', [FreeTierController::class, 'getFeatureComparison'])
+                ->name('api.free-tier.comparison');
+                
+            Route::get('/upgrade-recommendations', [FreeTierController::class, 'getUpgradeRecommendations'])
+                ->name('api.free-tier.upgrade-recommendations');
+        });
+
         // Usage tracking and analytics
         Route::prefix('usage')->group(function () {
             Route::get('/summary', [UsageController::class, 'summary'])
@@ -223,34 +245,34 @@ Route::prefix('v1')->group(function () {
 
         // Example feature-gated endpoints (demonstrating freemium functionality)
         Route::prefix('examples')->group(function () {
-            // Freemium features with usage limits
+            // Freemium features with usage limits using new FeatureGate middleware
             Route::post('/reports/basic', [ExampleFeatureController::class, 'generateBasicReport'])
-                ->middleware('feature:basic_reports,reports_per_month')
+                ->middleware('feature.gate:basic_reports,1')
                 ->name('api.examples.basic-report');
                 
             Route::post('/files/upload', [ExampleFeatureController::class, 'uploadFile'])
-                ->middleware('feature:file_storage,storage_mb')
+                ->middleware('feature.gate:file_storage,1')
                 ->name('api.examples.upload-file');
                 
             Route::post('/projects', [ExampleFeatureController::class, 'createProject'])
-                ->middleware('feature:projects,max_projects')
+                ->middleware('feature.gate:projects,1')
                 ->name('api.examples.create-project');
                 
             Route::post('/api-call', [ExampleFeatureController::class, 'makeApiCall'])
-                ->middleware('feature:api_access,api_calls_per_month')
+                ->middleware('feature.gate:api_access,1')
                 ->name('api.examples.api-call');
                 
             // Premium-only features
             Route::get('/analytics/advanced', [ExampleFeatureController::class, 'getAdvancedAnalytics'])
-                ->middleware('feature:advanced_analytics')
+                ->middleware('feature.gate:advanced_analytics,1')
                 ->name('api.examples.advanced-analytics');
                 
             Route::get('/branding', [ExampleFeatureController::class, 'getCustomBranding'])
-                ->middleware('feature:custom_branding')
+                ->middleware('feature.gate:custom_branding,1')
                 ->name('api.examples.custom-branding');
                 
             Route::post('/export', [ExampleFeatureController::class, 'exportData'])
-                ->middleware('feature:export_data')
+                ->middleware('feature.gate:data_export,1')
                 ->name('api.examples.export-data');
         });
         
