@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\PerformanceController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TaxCalculationController;
+use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Api\UpgradePromptController;
 use App\Http\Controllers\Api\UsageController;
 use App\Http\Controllers\Api\UserController;
@@ -297,6 +298,30 @@ Route::prefix('v1')->group(function () {
                 
             Route::get('/monitor', [PerformanceController::class, 'monitor'])
                 ->name('api.performance.monitor');
+        });
+        
+        // Multi-tenant management and security
+        Route::prefix('tenant')->middleware('tenant')->group(function () {
+            Route::get('/', [TenantController::class, 'show'])
+                ->name('api.tenant.show');
+                
+            Route::put('/', [TenantController::class, 'update'])
+                ->name('api.tenant.update');
+                
+            Route::get('/security-status', [TenantController::class, 'securityStatus'])
+                ->name('api.tenant.security-status');
+                
+            Route::get('/audit-logs', [TenantController::class, 'auditLogs'])
+                ->name('api.tenant.audit-logs');
+                
+            Route::get('/audit-summary', [TenantController::class, 'auditSummary'])
+                ->name('api.tenant.audit-summary');
+                
+            Route::post('/export-data', [TenantController::class, 'exportData'])
+                ->name('api.tenant.export-data');
+                
+            Route::post('/rotate-encryption-key', [TenantController::class, 'rotateEncryptionKey'])
+                ->name('api.tenant.rotate-encryption-key');
         });
         
         // API Information and documentation

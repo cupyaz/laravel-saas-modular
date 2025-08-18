@@ -31,7 +31,8 @@
       "Bash(grep:*)",
       "Bash(git add:*)",
       "Bash(sqlite3:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(./vendor/bin/phpunit:*)"
     ],
     "deny": []
   }

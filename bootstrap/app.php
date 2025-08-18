@@ -19,12 +19,19 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(prepend: [
             \App\Http\Middleware\MobileOptimization::class,
+            \App\Http\Middleware\TenantIsolation::class,
+        ]);
+
+        $middleware->api(prepend: [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \App\Http\Middleware\TenantIsolation::class,
         ]);
 
         $middleware->alias([
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'feature' => \App\Http\Middleware\CheckFeatureAccess::class,
             'mobile' => \App\Http\Middleware\MobileOptimization::class,
+            'tenant' => \App\Http\Middleware\TenantIsolation::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
