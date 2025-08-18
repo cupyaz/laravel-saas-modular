@@ -35,6 +35,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'tenant' => \App\Http\Middleware\TenantIsolation::class,
             'api.version' => \App\Http\Middleware\ApiVersioning::class,
             'api.rate' => \App\Http\Middleware\ApiRateLimit::class,
+            'admin' => \App\Http\Middleware\AdminAuth::class,
+            'admin_permission' => \App\Http\Middleware\AdminPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

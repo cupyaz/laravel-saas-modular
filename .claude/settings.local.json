@@ -32,7 +32,10 @@
       "Bash(git add:*)",
       "Bash(sqlite3:*)",
       "Bash(git commit:*)",
-      "Bash(./vendor/bin/phpunit:*)"
+      "Bash(./vendor/bin/phpunit:*)",
+      "WebSearch",
+      "Bash(sed:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

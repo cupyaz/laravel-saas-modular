@@ -482,11 +482,140 @@ curl http://localhost/api/v1/health \
 
 ---
 
+### ✅ US-021: Administrative User Management Dashboard
+**Status:** Completata ✅  
+**Priorità:** Alta  
+**Componenti:** Core feature, Admin Tools, Security  
+
+#### 🎯 Funzionalità Implementate
+- **Sistema amministrativo completo** con gestione utenti, ruoli e permessi
+- **Dashboard analytics** con metriche utenti, attività e sicurezza
+- **User impersonation** sicuro con audit trail completo
+- **Bulk operations** per gestione utenti in massa
+- **Audit logging** completo per compliance e sicurezza
+- **Role-based access control** con permessi granulari
+- **Email notifications** per azioni amministrative
+
+#### 🧪 Come Testare
+```bash
+# 1. Accesso dashboard amministrativo
+curl http://localhost/admin/dashboard \
+  -H "Authorization: Bearer ADMIN_TOKEN"
+
+# 2. Lista utenti con filtri avanzati
+curl "http://localhost/api/admin/users?search=john&status=active&tenant_id=1" \
+  -H "Authorization: Bearer ADMIN_TOKEN"
+
+# 3. Creazione nuovo utente
+curl -X POST http://localhost/api/admin/users \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ADMIN_TOKEN" \
+  -d '{
+    "name": "Test User",
+    "email": "test@example.com", 
+    "password": "SecurePass123!",
+    "tenant_id": 1,
+    "send_welcome_email": true
+  }'
+
+# 4. Sospensione utente con motivo
+curl -X POST http://localhost/api/admin/users/123/suspend \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ADMIN_TOKEN" \
+  -d '{"reason": "Terms of service violation"}'
+
+# 5. Operazioni bulk - Sospensione multipla
+curl -X POST http://localhost/api/admin/users/bulk-suspend \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ADMIN_TOKEN" \
+  -d '{
+    "user_ids": [1, 2, 3, 4, 5],
+    "reason": "Bulk suspension test"
+  }'
+
+# 6. User impersonation sicuro
+curl -X POST http://localhost/api/admin/users/123/impersonate \
+  -H "Authorization: Bearer ADMIN_TOKEN"
+
+# 7. Analytics dashboard
+curl http://localhost/api/admin/analytics/dashboard \
+  -H "Authorization: Bearer ADMIN_TOKEN"
+
+# 8. Audit logs con filtri
+curl "http://localhost/api/admin/audit-logs?action=user.created&admin_id=1" \
+  -H "Authorization: Bearer ADMIN_TOKEN"
+```
+
+#### 🔒 Componenti Sicurezza
+- **AdminAuth Middleware:** Autenticazione amministratori
+- **AdminPermission Middleware:** Controllo permessi granulari
+- **AdminRole Model:** Sistema ruoli con permessi predefiniti e personalizzabili
+- **AdminAuditLog Model:** Logging completo azioni amministrative
+- **UserImpersonationSession:** Tracking sessioni impersonation
+
+#### 📊 Ruoli Amministrativi Predefiniti
+- **Super Administrator:** Accesso completo sistema (users.*, tenants.*, system.*)
+- **User Administrator:** Gestione utenti (users.create, users.read, users.update, users.suspend)
+- **Support Agent:** Supporto limitato (users.read, users.update, users.impersonate)
+- **Analyst:** Solo lettura analytics (users.read, analytics.read)
+
+#### 🚀 Operazioni Bulk Supportate
+- **Bulk User Suspend/Reactivate:** Sospensione/riattivazione multipla
+- **Bulk User Export:** Export dati utenti in CSV/JSON
+- **Bulk Role Assignment:** Assegnazione ruoli multipli
+- **Bulk Email Notifications:** Invio notifiche personalizzate
+
+#### 📈 Dashboard Analytics
+- **User Analytics:** Crescita utenti, utenti attivi, distribuzione geografica
+- **Activity Analytics:** Login recenti, trend attività, engagement metrics
+- **Security Analytics:** Tentativi login falliti, eventi sicurezza, analisi rischi
+- **Admin Analytics:** Attività amministratori, azioni più frequenti
+- **Performance Metrics:** Tempi risposta, carico sistema, health status
+
+#### 📧 Sistema Notifiche Email
+- **UserSuspendedNotification:** Notifica sospensione account
+- **UserReactivatedNotification:** Notifica riattivazione account
+- **WelcomeUserNotification:** Benvenuto nuovi utenti creati da admin
+- **PasswordResetByAdminNotification:** Reset password da amministratore
+- **BulkOperationCompletedNotification:** Completamento operazioni bulk
+
+#### 📚 Database Tables
+- `admin_roles` - Ruoli amministrativi con permessi
+- `admin_permissions` - Permessi granulari di sistema
+- `admin_audit_logs` - Log audit completo azioni admin
+- `user_admin_roles` - Assegnazione ruoli admin a utenti
+- `user_impersonation_sessions` - Sessioni impersonation tracking
+- `admin_bulk_operations` - Tracking operazioni bulk con risultati
+
+#### 🔧 API Endpoints Principali
+- `GET /api/admin/users` - Lista utenti con filtri avanzati
+- `POST /api/admin/users` - Creazione nuovo utente
+- `PUT /api/admin/users/{id}` - Aggiornamento dati utente
+- `POST /api/admin/users/{id}/suspend` - Sospensione utente
+- `POST /api/admin/users/{id}/reactivate` - Riattivazione utente
+- `POST /api/admin/users/{id}/impersonate` - Avvio impersonation
+- `DELETE /api/admin/impersonation/{sessionId}` - Fine impersonation
+- `POST /api/admin/users/bulk-suspend` - Sospensione bulk
+- `POST /api/admin/users/bulk-reactivate` - Riattivazione bulk
+- `GET /api/admin/analytics/dashboard` - Dashboard analytics
+- `GET /api/admin/audit-logs` - Log audit con filtri
+
+#### 🧪 Test Implementati
+```bash
+# Test completi per sistema amministrativo
+./vendor/bin/phpunit tests/Feature/AdminUserManagementTest.php
+# ✅ 15+ test per gestione utenti, permessi, bulk operations
+
+./vendor/bin/phpunit tests/Unit/AdminModelsUnitTest.php  
+# ✅ 10+ test per modelli e strutture dati admin
+```
+
+---
+
 ## 🔮 Prossimi Sviluppi
 
 ### 📋 User Stories da Implementare
-1. **US-015: Module Management System** (Alta priorità)  
-2. **US-021: Administrative User Management** (Alta priorità)
+1. **US-015: Module Management System** (Alta priorità)
 
 ### 🎯 Roadmap Tecnica
 - **API Documentation** automatica
