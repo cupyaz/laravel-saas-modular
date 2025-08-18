@@ -33,6 +33,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'feature.gate' => \App\Http\Middleware\FeatureGate::class,
             'mobile' => \App\Http\Middleware\MobileOptimization::class,
             'tenant' => \App\Http\Middleware\TenantIsolation::class,
+            'api.version' => \App\Http\Middleware\ApiVersioning::class,
+            'api.rate' => \App\Http\Middleware\ApiRateLimit::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

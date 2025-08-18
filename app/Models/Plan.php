@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Plan extends Model
 {
@@ -128,5 +129,101 @@ class Plan extends Model
         }
         
         return $quantity <= $limit;
+    }
+
+    /**
+     * Get the features included in this plan.
+     */
+    public function features(): BelongsToMany
+    {
+        return $this->belongsToMany(Feature::class, 'plan_features')
+            ->withPivot('limit', 'is_included')
+            ->withTimestamps()
+            ->using(PlanFeature::class);
+    }
+
+    /**
+     * Check if the plan includes a specific feature.
+     */
+    public function includesFeature(string $featureSlug): bool
+    {
+        return $this->features()
+            ->where('slug', $featureSlug)
+            ->wherePivot('is_included', true)
+            ->exists();
+    }
+
+    /**
+     * Get the limit for a specific feature.
+     */
+    public function getFeatureLimit(string $featureSlug): ?int
+    {
+        $feature = $this->features()
+            ->where('slug', $featureSlug)
+            ->wherePivot('is_included', true)
+            ->first();
+
+        if (!$feature) {
+            return 0; // Feature not included
+        }
+
+        return $feature->pivot->limit;
+    }
+
+    /**
+     * Check if a feature allows a specific quantity.
+     */
+    public function allowsFeatureQuantity(string $featureSlug, int $quantity): bool
+    {
+        $feature = $this->features()
+            ->where('slug', $featureSlug)
+            ->wherePivot('is_included', true)
+            ->first();
+
+        if (!$feature) {
+            return false; // Feature not included
+        }
+
+        return $feature->pivot->allowsQuantity($quantity);
+    }
+
+    /**
+     * Get all free tier features with their limits.
+     */
+    public function getFreeTierFeatures(): array
+    {
+        if (!$this->isFree()) {
+            return [];
+        }
+
+        return $this->features()
+            ->wherePivot('is_included', true)
+            ->get()
+            ->map(function ($feature) {
+                return [
+                    'name' => $feature->name,
+                    'slug' => $feature->slug,
+                    'category' => $feature->category,
+                    'limit' => $feature->pivot->limit,
+                    'is_unlimited' => $feature->pivot->isUnlimited(),
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Scope to get free plans.
+     */
+    public function scopeFree($query)
+    {
+        return $query->where('price', 0);
+    }
+
+    /**
+     * Scope to get paid plans.
+     */
+    public function scopePaid($query)
+    {
+        return $query->where('price', '>', 0);
     }
 }

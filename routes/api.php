@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ApiDocumentationController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExampleFeatureController;
 use App\Http\Controllers\Api\FeatureController;
@@ -21,7 +22,31 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::prefix('v1')->group(function () {
+Route::prefix('v1')->middleware(['api.version', 'api.rate'])->group(function () {
+    // API Documentation (public)
+    Route::prefix('docs')->group(function () {
+        Route::get('/', [ApiDocumentationController::class, 'overview'])
+            ->name('api.docs.overview');
+            
+        Route::get('/endpoints', [ApiDocumentationController::class, 'endpoints'])
+            ->name('api.docs.endpoints');
+            
+        Route::get('/webhooks', [ApiDocumentationController::class, 'webhooks'])
+            ->name('api.docs.webhooks');
+            
+        Route::get('/rate-limits', [ApiDocumentationController::class, 'rateLimits'])
+            ->name('api.docs.rate-limits');
+            
+        Route::get('/versioning', [ApiDocumentationController::class, 'versioning'])
+            ->name('api.docs.versioning');
+            
+        Route::get('/errors', [ApiDocumentationController::class, 'errorCodes'])
+            ->name('api.docs.errors');
+            
+        Route::get('/resources', [ApiDocumentationController::class, 'resources'])
+            ->name('api.docs.resources');
+    });
+
     // Public API routes
     Route::get('/health', function () {
         return response()->json([
@@ -30,6 +55,7 @@ Route::prefix('v1')->group(function () {
             'version' => config('app.version', '1.0.0'),
             'environment' => config('app.env'),
             'laravel_version' => app()->version(),
+            'api_version' => config('api.version', '1.0'),
         ]);
     });
     
@@ -40,6 +66,7 @@ Route::prefix('v1')->group(function () {
             'cache_status' => 'operational',
             'timestamp' => now(),
             'uptime' => 'Available',
+            'api_version' => config('api.version', '1.0'),
         ]);
     });
 

@@ -369,12 +369,124 @@ if (!$result['allowed']) {
 
 ---
 
+### ✅ US-017: RESTful API and Integration Framework
+**Status:** Completata ✅  
+**Priorità:** Alta  
+**Componenti:** Core feature, Developer Tools, Integration  
+
+#### 🎯 Funzionalità Implementate
+- **API Framework completo** con risorse standardizzate
+- **Versioning automatico** con backward compatibility
+- **Rate limiting intelligente** basato su subscription tier
+- **Webhook system** per notifiche real-time
+- **Documentazione automatica** API con endpoint discovery
+- **Authentication & Authorization** completa
+- **Error handling** standardizzato con codici consistenti
+
+#### 🧪 Come Testare
+```bash
+# 1. API Overview e documentazione
+curl http://localhost/api/v1/docs \
+  -H "Accept: application/json"
+
+# 2. Test versioning API
+curl http://localhost/api/v1/health \
+  -H "Accept: application/vnd.api.v1.0+json"
+
+# 3. Test rate limiting
+curl http://localhost/api/v1/status \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -v # Controlla headers X-RateLimit-*
+
+# 4. Test endpoints documentazione
+curl http://localhost/api/v1/docs/endpoints
+curl http://localhost/api/v1/docs/webhooks
+curl http://localhost/api/v1/docs/rate-limits
+
+# 5. Test webhook events
+curl http://localhost/api/v1/docs/webhooks \
+  | jq '.events.events_by_category'
+
+# 6. Test versioning con header personalizzato
+curl http://localhost/api/v1/health \
+  -H "X-API-Version: 1.0" \
+  -v # Controlla header X-API-Version nella risposta
+```
+
+#### 🔧 Componenti API Framework
+- **BaseApiResource** - Classe base per risorse standardizzate
+- **ApiVersioning Middleware** - Gestione versioni con 4 metodi risoluzione
+- **ApiRateLimit Middleware** - Rate limiting tier-based con tracking
+- **ApiDocumentationController** - Documentazione automatica endpoints
+- **Webhook System** - Notifiche real-time con signature verification
+
+#### 📊 API Versioning Methods
+1. **Accept Header** - `application/vnd.api.v{version}+json` (priorità 1)
+2. **Version Header** - `X-API-Version: {version}` (priorità 2)  
+3. **Query Parameter** - `?api_version={version}` (priorità 3)
+4. **Path Prefix** - `/api/v{version}/` (priorità 4)
+
+#### 🚦 Rate Limiting Tiers
+- **Free:** 60/min, 1K/hour, 10K/day
+- **Basic:** 200/min, 5K/hour, 50K/day
+- **Pro:** 500/min, 15K/hour, 150K/day
+- **Enterprise:** 1K/min, 50K/hour, 500K/day
+
+#### 🔗 Webhook Events (25+ eventi)
+- **User events:** created, updated, deleted
+- **Tenant events:** created, updated, suspended, activated
+- **Subscription events:** created, cancelled, paused, resumed, expired
+- **Usage events:** limit_warning, limit_exceeded, reset
+- **Feature events:** access_granted, access_denied, limit_reached
+- **Security events:** login_failed, password_changed, suspicious_activity
+- **System events:** maintenance_start, maintenance_end, upgrade_available
+
+#### 📚 Documentation Endpoints
+- `GET /api/v1/docs` - API overview e configurazione
+- `GET /api/v1/docs/endpoints` - Tutti gli endpoints con categorie
+- `GET /api/v1/docs/webhooks` - Eventi webhook e signature verification
+- `GET /api/v1/docs/rate-limits` - Configurazione rate limiting
+- `GET /api/v1/docs/versioning` - Metodi versioning API
+- `GET /api/v1/docs/errors` - Codici errore standardizzati
+- `GET /api/v1/docs/resources` - Struttura risorse e formati
+
+#### 🔒 Security Features
+- **HMAC SHA256** signature per webhook security
+- **Bearer token** authentication (Laravel Sanctum)
+- **Rate limiting** per prevenire abuse
+- **Tenant isolation** per sicurezza multi-tenant
+- **Permission-based** access control
+
+#### 🧪 Test Eseguiti
+```bash
+# Test unitari componenti API
+./vendor/bin/phpunit tests/Unit/ApiFrameworkUnitTest.php
+# ✅ 11 test passati, 262 asserzioni
+```
+
+#### 📈 Response Format Standardizzato
+```json
+{
+  "data": {}, // Main resource data
+  "meta": {
+    "api_version": "1.0",
+    "timestamp": "2024-08-18T12:00:00Z",
+    "request_id": "uuid"
+  },
+  "links": {
+    "self": "current-resource-url",
+    "related": {} // Related resources
+  }
+}
+```
+
+---
+
 ## 🔮 Prossimi Sviluppi
 
 ### 📋 User Stories da Implementare
-1. **US-017: RESTful API Framework** (Alta priorità)
-2. **US-015: Module Management System** (Alta priorità)  
-3. **US-021: Administrative User Management** (Alta priorità)
+1. **US-015: Module Management System** (Alta priorità)  
+2. **US-021: Administrative User Management** (Alta priorità)
 
 ### 🎯 Roadmap Tecnica
 - **API Documentation** automatica
