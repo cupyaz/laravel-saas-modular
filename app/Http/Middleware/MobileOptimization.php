@@ -4,200 +4,228 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\JsonResponse;
+use App\Services\MobilePerformanceService;
+use Illuminate\Support\Facades\Log;
 
 class MobileOptimization
 {
+    protected $mobilePerformanceService;
+
+    public function __construct(MobilePerformanceService $mobilePerformanceService)
+    {
+        $this->mobilePerformanceService = $mobilePerformanceService;
+    }
+
     /**
      * Handle an incoming request.
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next): mixed
     {
+        $startTime = microtime(true);
+
+        // Process the request
         $response = $next($request);
-        
-        // Detect mobile device
-        $isMobile = $this->isMobileDevice($request);
-        $isTablet = $this->isTabletDevice($request);
-        $isTouchDevice = $isMobile || $isTablet;
-        
-        // Add device detection to view data
-        if (method_exists($response, 'header')) {
-            $response->header('X-Device-Type', $isMobile ? 'mobile' : ($isTablet ? 'tablet' : 'desktop'));
+
+        // Only optimize for mobile devices and JSON responses
+        if (!$this->shouldOptimize($request, $response)) {
+            return $response;
         }
-        
-        // Share device info with views
-        view()->share('isMobile', $isMobile);
-        view()->share('isTablet', $isTablet);
-        view()->share('isTouchDevice', $isTouchDevice);
-        view()->share('deviceType', $isMobile ? 'mobile' : ($isTablet ? 'tablet' : 'desktop'));
-        
-        // Add mobile-specific headers
-        if ($isMobile) {
-            $this->addMobileHeaders($response);
+
+        try {
+            // Optimize the response for mobile
+            $optimizedResponse = $this->optimizeResponse($request, $response);
+            
+            // Add performance headers
+            $this->addPerformanceHeaders($optimizedResponse, $request, $startTime);
+            
+            // Track performance metrics
+            $this->trackPerformanceMetrics($request, $startTime, $response, $optimizedResponse);
+
+            return $optimizedResponse;
+
+        } catch (\Exception $e) {
+            Log::error('Mobile optimization failed', [
+                'error' => $e->getMessage(),
+                'url' => $request->fullUrl(),
+                'user_id' => $request->user()?->id
+            ]);
+
+            // Return original response if optimization fails
+            return $response;
         }
-        
-        // Add performance headers
-        $this->addPerformanceHeaders($response);
-        
-        return $response;
     }
-    
+
     /**
-     * Detect if the request is from a mobile device
+     * Determine if the response should be optimized.
      */
-    private function isMobileDevice(Request $request): bool
+    private function shouldOptimize(Request $request, $response): bool
     {
-        $userAgent = $request->header('User-Agent', '');
-        
-        // Mobile patterns
-        $mobilePatterns = [
-            '/Mobile/i',
-            '/Android/i',
-            '/iPhone/i',
-            '/iPod/i',
-            '/BlackBerry/i',
-            '/Windows Phone/i',
-            '/webOS/i',
-            '/Opera Mini/i',
-            '/IEMobile/i',
-            '/Mobile.*Firefox/i',
-        ];
-        
-        foreach ($mobilePatterns as $pattern) {
-            if (preg_match($pattern, $userAgent)) {
-                return true;
+        // Check if it's a mobile device
+        if (!$this->mobilePerformanceService->isMobileDevice($request)) {
+            return false;
+        }
+
+        // Check if it's a JSON response
+        if (!$response instanceof JsonResponse) {
+            return false;
+        }
+
+        // Skip optimization for certain routes
+        $skipRoutes = ['api/mobile/performance/test', 'api/debug'];
+        foreach ($skipRoutes as $skipRoute) {
+            if ($request->is($skipRoute)) {
+                return false;
             }
         }
-        
-        return false;
+
+        // Check if optimization is enabled
+        return config('mobile.optimization.enabled', true);
     }
-    
+
     /**
-     * Detect if the request is from a tablet device
+     * Optimize the JSON response for mobile.
      */
-    private function isTabletDevice(Request $request): bool
+    private function optimizeResponse(Request $request, JsonResponse $response): JsonResponse
     {
-        $userAgent = $request->header('User-Agent', '');
+        $originalData = $response->getData(true);
         
-        // Tablet patterns
-        $tabletPatterns = [
-            '/iPad/i',
-            '/Android.*Tablet/i',
-            '/Android(?!.*Mobile)/i',
-            '/Kindle/i',
-            '/Silk/i',
-            '/PlayBook/i',
-            '/Tablet/i',
-        ];
-        
-        foreach ($tabletPatterns as $pattern) {
-            if (preg_match($pattern, $userAgent)) {
-                return true;
-            }
+        if (!is_array($originalData)) {
+            return $response;
         }
-        
-        return false;
-    }
-    
-    /**
-     * Add mobile-specific headers
-     */
-    private function addMobileHeaders(Response $response): void
-    {
-        // Optimize for mobile networks
-        $response->header('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
-        
-        // Reduce data usage
-        $response->header('Save-Data', 'on');
-        
-        // Mobile-specific content hints
-        $response->header('Vary', 'User-Agent, Save-Data');
-        
-        // Touch optimization
-        $response->header('Touch-Action', 'manipulation');
-    }
-    
-    /**
-     * Add performance optimization headers
-     */
-    private function addPerformanceHeaders(Response $response): void
-    {
-        // Resource hints for critical resources
-        $response->header('Link', '</css/app.css>; rel=preload; as=style, </js/app.js>; rel=preload; as=script');
-        
-        // Connection optimization
-        $response->header('Connection', 'keep-alive');
-        
-        // Compression hints
-        if (!$response->headers->has('Content-Encoding')) {
-            $response->header('Vary', $response->headers->get('Vary', '') . ', Accept-Encoding');
+
+        // Apply mobile optimizations
+        $optimizedData = $this->mobilePerformanceService->optimizeResponse($originalData, $request);
+
+        // Add mobile-specific metadata
+        $optimizedData = $this->addMobileMetadata($optimizedData, $request);
+
+        // Create optimized response
+        $optimizedResponse = response()->json($optimizedData, $response->getStatusCode());
+
+        // Copy original headers
+        foreach ($response->headers->all() as $key => $values) {
+            $optimizedResponse->headers->set($key, $values);
         }
+
+        return $optimizedResponse;
     }
-    
+
     /**
-     * Get device-specific viewport meta tag
+     * Add mobile-specific metadata to the response.
      */
-    public static function getViewportMeta(string $deviceType = 'mobile'): string
+    private function addMobileMetadata(array $data, Request $request): array
     {
-        $viewports = [
-            'mobile' => 'width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover',
-            'tablet' => 'width=device-width, initial-scale=1, maximum-scale=3, user-scalable=yes',
-            'desktop' => 'width=device-width, initial-scale=1',
-        ];
+        $connectionType = $this->mobilePerformanceService->getConnectionType($request);
         
-        return $viewports[$deviceType] ?? $viewports['mobile'];
-    }
-    
-    /**
-     * Get device-specific CSS classes
-     */
-    public static function getDeviceClasses(bool $isMobile, bool $isTablet): string
-    {
-        $classes = [];
-        
-        if ($isMobile) {
-            $classes[] = 'is-mobile';
-        } elseif ($isTablet) {
-            $classes[] = 'is-tablet';
-        } else {
-            $classes[] = 'is-desktop';
+        // Add mobile context to metadata
+        if (!isset($data['_mobile'])) {
+            $data['_mobile'] = [
+                'optimized' => true,
+                'connection_type' => $connectionType,
+                'optimization_level' => $this->getOptimizationLevel($connectionType),
+                'cache_strategy' => $this->getCacheStrategy($connectionType),
+                'preload_enabled' => config('mobile.preload.enabled', true),
+                'lazy_load_enabled' => config('mobile.lazy_load.enabled', true)
+            ];
         }
-        
-        if ($isMobile || $isTablet) {
-            $classes[] = 'is-touch';
-        } else {
-            $classes[] = 'is-no-touch';
-        }
-        
-        return implode(' ', $classes);
+
+        return $data;
     }
-    
+
     /**
-     * Get optimized image sizes for device
+     * Add performance headers to the response.
      */
-    public static function getImageSizes(string $deviceType = 'mobile'): array
+    private function addPerformanceHeaders(JsonResponse $response, Request $request, float $startTime): void
     {
-        $sizes = [
-            'mobile' => [
-                'thumbnail' => '150x150',
-                'small' => '300x200',
-                'medium' => '600x400',
-                'large' => '900x600',
-            ],
-            'tablet' => [
-                'thumbnail' => '200x200',
-                'small' => '400x300',
-                'medium' => '800x600',
-                'large' => '1200x800',
-            ],
-            'desktop' => [
-                'thumbnail' => '250x250',
-                'small' => '500x400',
-                'medium' => '1000x700',
-                'large' => '1600x1000',
-            ],
-        ];
+        $processingTime = (microtime(true) - $startTime) * 1000;
+        $responseSize = strlen($response->getContent());
         
-        return $sizes[$deviceType] ?? $sizes['mobile'];
+        $response->headers->add([
+            'X-Mobile-Optimized' => 'true',
+            'X-Processing-Time' => round($processingTime, 2) . 'ms',
+            'X-Response-Size' => $responseSize . 'b',
+            'X-Connection-Type' => $this->mobilePerformanceService->getConnectionType($request),
+            'X-Device-Type' => $this->mobilePerformanceService->isMobileDevice($request) ? 'mobile' : 'desktop',
+            'X-Cache-Strategy' => $this->getCacheStrategy($this->mobilePerformanceService->getConnectionType($request)),
+        ]);
+
+        // Add caching headers based on connection type
+        $this->addCachingHeaders($response, $request);
+    }
+
+    /**
+     * Add appropriate caching headers based on connection type.
+     */
+    private function addCachingHeaders(JsonResponse $response, Request $request): void
+    {
+        $connectionType = $this->mobilePerformanceService->getConnectionType($request);
+        
+        $cacheMaxAge = match($connectionType) {
+            'slow-2g', '2g' => 86400, // 24 hours for slow connections
+            '3g' => 7200,             // 2 hours for 3G
+            '4g' => 3600,             // 1 hour for 4G
+            default => 1800           // 30 minutes default
+        };
+
+        $response->headers->add([
+            'Cache-Control' => "public, max-age={$cacheMaxAge}, must-revalidate",
+            'Vary' => 'User-Agent, Network-Information',
+            'X-Cache-TTL' => $cacheMaxAge . 's'
+        ]);
+
+        // Add ETag for better caching
+        $etag = md5($response->getContent() . $connectionType);
+        $response->headers->set('ETag', $etag);
+    }
+
+    /**
+     * Track performance metrics for the optimization process.
+     */
+    private function trackPerformanceMetrics(Request $request, float $startTime, $originalResponse, $optimizedResponse): void
+    {
+        $processingTime = (microtime(true) - $startTime) * 1000;
+        $originalSize = strlen($originalResponse->getContent());
+        $optimizedSize = strlen($optimizedResponse->getContent());
+        
+        $sizeReduction = $originalSize > 0 ? (($originalSize - $optimizedSize) / $originalSize) * 100 : 0;
+
+        $this->mobilePerformanceService->trackPerformanceMetrics($request, [
+            'middleware' => 'mobile_optimization',
+            'processing_time_ms' => $processingTime,
+            'original_size_bytes' => $originalSize,
+            'optimized_size_bytes' => $optimizedSize,
+            'size_reduction_percent' => round($sizeReduction, 2),
+            'optimization_applied' => true,
+            'endpoint' => $request->path(),
+            'method' => $request->method(),
+            'status_code' => $optimizedResponse->getStatusCode()
+        ]);
+    }
+
+    /**
+     * Get optimization level based on connection type.
+     */
+    private function getOptimizationLevel(string $connectionType): string
+    {
+        return match($connectionType) {
+            'slow-2g', '2g' => 'aggressive',
+            '3g' => 'moderate',
+            '4g' => 'light',
+            default => 'standard'
+        };
+    }
+
+    /**
+     * Get cache strategy based on connection type.
+     */
+    private function getCacheStrategy(string $connectionType): string
+    {
+        return match($connectionType) {
+            'slow-2g', '2g' => 'extended',
+            '3g' => 'standard',
+            '4g' => 'light',
+            default => 'auto'
+        };
     }
 }
