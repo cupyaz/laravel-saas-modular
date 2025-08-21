@@ -36,7 +36,11 @@
       "WebSearch",
       "Bash(sed:*)",
       "Bash(mv:*)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(gh auth:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh repo list:*)",
+      "Bash(rsync:*)"
     ],
     "deny": []
   }

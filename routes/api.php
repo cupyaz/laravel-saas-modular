@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ExampleFeatureController;
 use App\Http\Controllers\Api\FeatureController;
 use App\Http\Controllers\Api\FreeTierController;
 use App\Http\Controllers\Api\ModuleController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PerformanceController;
 use App\Http\Controllers\Api\PlanController;
@@ -241,6 +242,36 @@ Route::prefix('v1')->middleware(['api.version', 'api.rate'])->group(function () 
                 
             Route::post('/can-perform', [UsageController::class, 'canPerform'])
                 ->name('api.usage.can-perform');
+        });
+
+        // Real-time Notification System (Authenticated)
+        Route::group(['prefix' => 'notifications'], function () {
+            // User Notifications
+            Route::get('/', [NotificationController::class, 'getUserNotifications'])->name('api.notifications.index');
+            Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('api.notifications.unread_count');
+            Route::put('/{notificationId}/read', [NotificationController::class, 'markAsRead'])->name('api.notifications.mark_read');
+            Route::put('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('api.notifications.mark_all_read');
+            Route::delete('/{notificationId}', [NotificationController::class, 'deleteNotification'])->name('api.notifications.delete');
+            
+            // User Preferences
+            Route::get('/preferences', [NotificationController::class, 'getPreferences'])->name('api.notifications.preferences');
+            Route::put('/preferences', [NotificationController::class, 'updatePreferences'])->name('api.notifications.preferences.update');
+            Route::put('/settings', [NotificationController::class, 'updateSettings'])->name('api.notifications.settings.update');
+            Route::post('/preferences/reset', [NotificationController::class, 'resetPreferences'])->name('api.notifications.preferences.reset');
+            
+            // Templates and Statistics
+            Route::get('/templates', [NotificationController::class, 'getTemplates'])->name('api.notifications.templates');
+            Route::get('/statistics', [NotificationController::class, 'getStatistics'])->name('api.notifications.statistics');
+            
+            // Testing
+            Route::post('/test', [NotificationController::class, 'test'])->name('api.notifications.test');
+            
+            // Admin-only endpoints
+            Route::middleware('admin')->group(function () {
+                Route::post('/bulk', [NotificationController::class, 'sendBulk'])->name('api.notifications.bulk');
+                Route::get('/analytics', [NotificationController::class, 'getAnalytics'])->name('api.notifications.analytics');
+                Route::get('/logs', [NotificationController::class, 'getLogs'])->name('api.notifications.logs');
+            });
         });
 
         // Upgrade prompts and conversion optimization
